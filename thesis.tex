@@ -1,0 +1,71 @@
+\documentclass[openright,twoside]{iitkthesis}
+
+%=====================================================================
+%  Single counter for theorems and theorem-like environments:
+%=====================================================================
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{assertion}[theorem]{Assertion}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{figger}[theorem]{Figure}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{prop}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+
+\usepackage{minted}
+\usemintedstyle{bw}
+
+% \usepackage{fontspec}
+% \setmonofont[Scale=0.85]{DejaVu Sans Mono}
+
+\usepackage[sorting=none, maxbibnames=99, minbibnames=99, backend=biber]{biblatex}
+\bibliography{citations}
+\usepackage{amsmath}
+\usepackage{lipsum}
+\usepackage{float}
+\usepackage[hidelinks]{hyperref}
+\usepackage{microtype}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{fancyref}
+\usepackage{color,soul} % for highlights
+\usepackage{enumerate}
+\usepackage{tabularx}
+
+\setlength{\headheight}{15pt}
+
+\expandafter\def\csname PY@tok@err\endcsname{}
+
+\floatstyle{ruled}
+\newfloat{program}{thp}{lop}
+\floatname{program}{Figure}
+
+\numberwithin{program}{chapter}
+
+\BeforeBeginEnvironment{program}{\begin{singlespace}}
+\AfterEndEnvironment{program}{\end{singlespace}}
+
+% ====================================================================
+% Start Document
+%
+
+\begin{document}
+
+\include{prelude}
+
+\begin{singlespace}
+\cleardoublepage
+\addcontentsline{toc}{chapter}{References}
+\renewcommand\bibname{References}
+\printbibliography
+\nocite{*}
+\end{singlespace}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
