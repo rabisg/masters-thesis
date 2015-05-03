@@ -1,0 +1,58 @@
+\chapter{Introduction}
+\label{chap:intro}
+Persistence and retrieval of stored data forms an integral part of any application.
+A database management system (DBMS) is a specialized software build for organizing large collection of data
+whereas a database index (or just index) is a data structure, often build into the DBMS,
+that provides an efficient and fast way to query the collection without having to go through the entire dataset.
+
+Over the years the approach to databases have evolved from navigational databases
+to relational model, first proposed by Edgar F. Codd\cite{codd1970relational},
+and more recently to fast key-value and document based stores.
+These post-relational databases came to be known as NoSQL, a term coined by Carlo Strozzi\cite{strozziNoSQL},
+and have been widely used in big data and real-time applications.
+
+Indexing has also been a widely studied and researched topic as a part of Information Retrieval Systems
+The data structures required for indexing depend highly on the use case.
+For example, \textit{Postgresql} which is one of the most commonly used SQL databases has four major types of indexes.
+Each index type is based on a different set of algorithms and data structures which provides a specific set of functionality where functionality refers to the kind of operations (operators) that index type can support.
+The most commonly implemented index type is a \textbf{B-Tree} based index which supports equality and range based
+operations and provides good performance for commonly used SQL types like numeric data, strings and dates.
+However a \textbf{B-Tree} or \textbf{B*-Tree} based index is not sufficient for all types of access patterns.
+Specifically text based retrieval in which a word or a phrase is to be matched against a given set of documents is one
+such application where \textbf{B*-Tree} based indexes is generally not the data structure of choice.
+Text retrieval, as it is called, has been an area of active research and development.
+Different data structures and algorithms have been proposed which not only focus on the correctness of the results
+but also on their relevance
+
+\section{Motivation}
+For relevance based matching text-search engines need to store meta-data besides the actual document identifiers.
+For simple text-search where only correctness matters storing the document reference is enough.
+In all cases, the building block of any text based retrieval system is having a text to value mapping where
+value can range from simple document identifiers to compound data structures storing meta information like the frequency
+of the term or score of the document (based on any scoring mechanism).
+Also the keys, which are arrays of characters in this case, need to support advanced operations in order for
+the search engine to provide additional facilities (for example approximate or fuzzy search).
+Thus a general purpose optimized key-value store can serve as the building block in a lot of applications
+
+\section{Related Work}
+
+\subsection{Apache Lucene}
+Lucene, a free and open source library for indexing and searching, was originally written by Doug Cutting\cite{goetz2000lucene}
+in Java. Doug originally wrote it in 1999 but later it became a part of Apache Software Foundation under its Jakarta family
+of open source Java projects.
+Lucene and its derivatives are widely used and it has been known for its powerful, accurate and efficient search algorithms.
+Over the years many developers have contributed resulting in advanced features like suggester, highlighting support, flexible faceting, etc.
+ElasticSearch and Apache Solr are two examples of application build on top of this library that provide enterprise class search
+platform with features like replication, rich document support, database integration and some NoSQL features
+
+\subsection{Xapian}
+Xapian is also a free and open source library supporting full text search and probabilistic matching.
+It is written in C++ and provides features like Transaction Support, spelling correction, synonym support, etc.
+Omega is an packaged solution on top of Xapian which provides a search engine like support to other applications.
+
+\section{Outline}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "thesis"
+%%% End:
