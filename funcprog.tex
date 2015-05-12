@@ -1,0 +1,85 @@
+\chapter{Functional Programming}
+\label{chap:FuncProg}
+
+Functional Programming is a programming paradigm which treats functions as first class members
+and computations are modeled as the evaluation of mathematical functions i.e. the output of functions
+depends only on the input parameters and not on a globally modifiable state or data.
+This paradigm allows us to better argue about the semantics and the correctness of the program as the output of each function,
+which is the building block of the program, depends only on the the set of input provided and through
+mathematical constructs the correctness of the program can be expressed as the composition of the correctness measures
+of the constituent functions.
+Functional programming was born out of Lambda Calculus, a formal system described by Alonzo Church, to study computability.
+
+\section{Purely Functional}
+In contrast to imperative languages which view computation as global state and a set of commands modifying this shared state
+declarative programming proposes an alternate programming model in which the emphasis is on the logic of the program rather
+than the control flow.
+In this respect, \textbf{referential transparency} is a key concept which means that an expression can always be replaced with its
+value and that this replacement should not change the result of the program.
+Referential transparency aids in arguments about the correctness and behavior of the program, can greatly help in optimizations
+like memoization, code transformations, converting to lazy or strict evaluation and parallelisation optimizations that are
+otherwise difficult in imperative languages.
+
+\section{Higher Order Functions}
+In functional languages like Haskell functions are treated as first class variables meaning they can be passed to functions
+and functions can return functions just like any variable. This combined with the concept of partial application of arguments to a
+function know as \textbf{currying} provides a powerful programming construct.
+
+An example of this would be the function \texttt{map} which takes a function and a list of arguments and applies the function to the list
+generating a new list. Using this and applying it on a function that takes an integer and increments it by \texttt{1} would give us another
+function that takes a list of integers and increments all of them by \texttt{1}.
+
+\begin{listing}
+\inputminted{haskell}{hs/higher_order.hs}
+\caption{Higher Order Functions}
+\end{listing}
+
+\section{Powerful Type System}
+Haskell provides a powerful type system in which each value has an associated type.
+Type system enables program verification by imposing constraints on value and systematic checking of those systems using mathematically
+sound and complete proving systems.
+Haskell provides a strongly and statically checked type system along with powerful constructs to express higher level and more expressive types
+While \textbf{type inference} relieves the user from explicitly having to define types with each individual value,
+the presence of \textbf{abstract data types} and \textbf{pattern matching} makes use of complex data types convenient.
+
+\subsection{Static Typing}
+Haskell is a statically typed language meaning that all type checks happen at compile time. This is in contrast to dynamically typed languages
+in which all type checking happens at run-time. The benefits of static type checking is in the fact that the compiler can test and verify the
+program before it is actually executed, thus preventing from real world crashes that could have occurred otherwise.
+Also compile time type checking means that the type information can be erased at run-time resulting in no run-time overhead of checking
+and ensuring types.
+
+\subsection{Strongly Typed}
+Strongly typed means that every value must be associated with a type.
+Liskov and Zilles define strong typing as ``whenever an object is passed from a calling function to a called function,
+ its type must be compatible with the type declared in the called function''\cite{LZ74}.
+Generally strongly typed languages disallow direct type casting of one type to another and implicit casts.
+
+
+\section{Lazy Evaluation}
+Lazy evaluation is a the concept of \textbf{call by need} in which the value of an expression is only calculated when it is required.
+The benefits of lazy evaluation include
+\begin{packed_itemize}
+\item Performance benefits by identifying redundant or repeating computations and performing optimizations
+\item It allows creating and operating on infinite data structures
+\item Allows for complex control flow structures like value recursion, in which a value is defined in terms of itself
+\end{packed_itemize}
+
+\section{Concurrency Primitives}
+Concurrent Haskell\cite{jones1996concurrent} extended the semantics of Haskell to include concurrency alongside lazy functional code.
+Concurrency in Haskell can be described using three main concepts
+\begin{description}
+\item[Mutable Var] A mutable variable can be thought of as a reference to a mutable location in memory which can either be empty or hold
+a value of type \textbf{$\alpha$}.
+\item[Concurrent Threads] Concurrent Haskell provided a new primitive \texttt{forkIO} which starts a concurrent process.
+\item[Software Transactional Memory] Software Transactional Memory or their implementation \textbf{STM}\cite{harris2005composable}
+is a way to model concurrent programs using shared memory without locks. The idea is similar to database transactions in which multiple
+reads and writes can happen to shared memory such that intermediate states are not visible to other transactions.
+\end{description}
+
+%\section{Extensions, Polymorphism \& Beyond}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "thesis"
+%%% End:

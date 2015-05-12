@@ -16,7 +16,8 @@
 \newtheorem{remark}[theorem]{Remark}
 
 \usepackage{minted}
-\usemintedstyle{bw}
+%\usemintedstyle{bw}
+\setminted{mathescape,linenos,frame=lines,framesep=3mm}
 
 % \usepackage{fontspec}
 % \setmonofont[Scale=0.85]{DejaVu Sans Mono}
@@ -51,11 +52,27 @@
 % Start Document
 %
 
+% ====================================
+% Custom Commands
+% ====================================
+\newenvironment{packed_itemize}{
+\begin{itemize}
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}
+}{\end{itemize}}
+
+
+% ====================================
+% Document
+% ====================================
 \begin{document}
 
 \include{prelude}
 
 \input{introduction}
+
+\input{funcprog}
 
 \begin{singlespace}
 \cleardoublepage
