@@ -48,6 +48,10 @@
 \BeforeBeginEnvironment{program}{\begin{singlespace}}
 \AfterEndEnvironment{program}{\end{singlespace}}
 
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{newunicodechar}
+\newunicodechar{✓}{\checkmark}
 % ====================================================================
 % Start Document
 %
@@ -73,6 +77,8 @@
 \input{introduction}
 
 \input{funcprog}
+
+\input{indexing}
 
 \begin{singlespace}
 \cleardoublepage
