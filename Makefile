@@ -6,7 +6,7 @@ thesis.pdf: $(wildcard *.tex) $(wildcard *.cls) citations.bib $(wildcard hs/*.[l
 clean:
 	latexmk -C
 	rm -rf auto/
-	rm thesis.{pyg,run.xml}
-	rm _region_.*
-
+	rm -f thesis.{pyg,run.xml,bbl,lol,lop}
+	rm -f _region_.*
+	
 .PHONY: all clean
