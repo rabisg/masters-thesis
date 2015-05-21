@@ -65,6 +65,11 @@ The benefits of lazy evaluation include
 \item Allows for complex control flow structures like value recursion, in which a value is defined in terms of itself
 \end{packed_itemize}
 
+\begin{listing}
+\inputminted{literate-haskell}{hs/fibonacci.lhs}
+\caption{Computing Fibonacci using Lazy Evaluation}
+\end{listing}
+
 \section{Concurrency Primitives}
 Concurrent Haskell\cite{jones1996concurrent} extended the semantics of Haskell to include concurrency alongside lazy functional code.
 Concurrency in Haskell can be described using three main concepts
