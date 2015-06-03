@@ -125,8 +125,13 @@ It allows the user to perform various kinds of traversals which in turn add to t
 
 
 \section{Querying the Index}
-% TODO
-
+Querying the index generally involves two steps.
+First looking up the dictionary to retrieve the pointer (offset in the file) to the document.
+And then looking up the document according to the pointer.
+However just retrieving the documents isn't enough. The documents need to be sorted according to relevance.
+For this we need a measure of relevance of the documents, which might depend on the metadata of the document or the content or both.
+Different models have been proposed for measuring the relevance of the query results based on term frequencies, term vectors, etc.
+The model of choice is generally application specific.
 
 %%% Local Variables:
 %%% mode: latex
