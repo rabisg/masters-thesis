@@ -1,0 +1,27 @@
+\chapter{Conclusion}
+\label{chap:conclusion}
+
+\section {Summary}
+In this thesis, we have provided an abstraction and implementation of a general purpose text indexing system in Haskell.
+We gave a brief introduction to functional programming and its related concepts in Haskell,
+followed by text indexing in general and then went on to describe how using type safety and advanced concurrency models in Haskell
+we implemented the text indexing engine.
+
+The design is inspired by real world tested and proven frameworks like Lucene combined with concepts taken from other systems like maildir format\cite{bernsteinMaildir}
+and we have also complemented our implementation with comprehensive documentation and test suites.
+
+\section{Future Work}
+Currently the implementation uses some POSIX specific functionality and thus would not run on Windows out of the box.
+However in principle there is no hard dependency on any platform and its just a matter of porting the POSIX system calls to Windows Userland.
+
+Also in order for this to be usable directly in any application a lot of functionality needs to be built on top of this implementation.
+For example before indexing the content must be pre-processed to remove stop words, terms must be stemmed, etc.
+A general overview of the kind of functionality that is generally required is provided in Chapter \ref{chap:textIndexing}
+
+On the other hand, this project is a part of a larger project to provide a key-value and binary data store along with a text indexing framework.
+Efforts are underway to integrate all these projects into a full fledged solution.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "thesis"
+%%% End:
