@@ -63,6 +63,13 @@
 %--------------------------------------------------------------------%
 % ABSTRACT
 \begin{abstract}
+In this thesis we use Haskell, a polymorphic strongly statically typed, purely functional language to build a text indexing framework.
+We build upon the concepts used in frameworks like Lucene and use Haskell's advanced type safety and concurrency features to
+provide a generic framework for the indexing system.
+The system is designed to be concurrent and operations to be thread safe while segments help
+make the system easy to parallelize for future extension in a distributed environment.
+We also explore various data structures for dictionary representation and argue why a Trie based implementation
+based on multilevel Patricia Trees representation is our data structure of choice.
 \end{abstract}
 
 %--------------------------------------------------------------------%
