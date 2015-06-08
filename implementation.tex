@@ -1,0 +1,144 @@
+\chapter{Implementation}
+\label{chap:implementation}
+
+The general idea behind this implementation has been inspired by Lucene\cite{goetz2000lucene}
+which in turn have been studied extensively in Information Retrieval Systems.
+The rest of this chapter is organized as follows
+%TODO
+
+\section{Definitions}
+
+\subsection{Segment}
+A segment is the basic unit of the index.
+Each index consists of one or more segments, where each segment is a standalone index holding a subset of the indexed documents\cite{mccandless2010lucene}
+A segment is created whenever the index is flushed at which point all the documents and their indexed terms are written to disk.
+Querying the index is a compound operation of querying all the active segments, combining their results and presenting it to the end user.
+As the number of segments can grow with time there is a provision to coalesce two segments at a time through the \textit{merge} operation.
+
+\subsection{Document}
+A document is the logical unit of indexing and searching for the index.
+A document consists of multiple \textit{fields} which may or may not be indexed.
+Each fields hold a value of certain type- text, blob, number, boolean, etc.- which is the actual content which gets indexed.
+In our current implementation the documents are not stored but only the terms are extracted from it and the inverted index is written in segments.
+Thus currently we only support text fields.
+
+We use a typeclass to capture the structure of \textit{Document}:
+\begin{listing}
+\inputminted{haskell}{hs/document.hs}
+\caption{Typeclass to capture the structure of documents}
+\end{listing}
+
+\subsection{Dictionary}
+As explained in Section~\ref{dictionary} a \textit{dictionary} is a data structure used to store the mapping from \textit{term} to \textit{postings} (or a reference to it)
+\begin{listing}
+\inputminted{haskell}{hs/dictionary.hs}
+\caption{Newtype to capture dictionary}
+\end{listing}
+
+\pagebreak
+\noindent where \texttt{offset} is an alias for 64-bit integer
+\begin{listing}
+\inputminted{haskell}{hs/offset.hs}
+\caption{Definition of Offset}
+\end{listing}
+
+\subsection{Terms \& Postings}
+A \texttt{newtype} is defined to capture \textit{terms} (defined in Section~\ref{terms})
+\begin{listing}
+\inputminted{haskell}{hs/term.hs}
+\caption{Definition of Term}
+\end{listing}
+
+\noindent whereas postings is defined as a record type of \texttt{documentId} and parameterized type \texttt{p}.
+The parameterized type is used to capture the auxiliary information the posting stores, for example,
+the term frequency, character offsets, term vectors, etc.
+\begin{listing}
+\inputminted{haskell}{hs/postings.hs}
+\caption{Definition of Postings}
+\end{listing}
+
+It is worth mentioning that all the above type definitions heavily use Phantom Types\cite{cheney2003phantom} to provide an extra layer of type safety.
+\texttt{doc} and \texttt{p} are two commonly used type variables that are used to represent the document and postings type respectively.
+The use of phantom types ensure that operations on different types of indices do not pollute each other.
+
+
+\section{Data Structure for Dictionary}
+The kind of operations supported by the index depends a lot on the data structure used to represent the \textit{dictionary}.
+In our case, besides simple query, we also wanted to support edit distance based queries.
+In Lucene\cite{mccandless2012fst} the data structure of choice is a Deterministic Finite State Transducer\cite{mohri2004weighted} (FST)
+They are a variant of Finite State Automata where in addition to transition symbol each arc is optionally tagged with a output symbol of a semiring.
+Upon traversing the transducers the output symbols are added to provide a output symbol along with the state.
+Effectively they can be used to map input in some particular domain to arbitrary outputs similar to a sorted dictionary but with a considerable smaller memory footprint.
+FSTs have been studied extensively including their addition, difference, minimization and composition properties.
+%TODO - Add a figure of FST
+
+However we are only concerned with the following operations:
+\begin{itemize}
+\item Incremental building of dictionary
+\item Searching through the dictionary to find the corresponding offset to a term
+\item Edit distance based traversal to find terms withing a edit distance $e$ of the search term
+\item Fast serialization and deserialization
+\end{itemize}
+When considering these operations one would notice that a \textit{trie}\cite{fredkin1960trie} can effectively perform these operations
+
+\subsection{Patricia Trees}
+PATRICIA- Practical Algorithm to Retrieve Information Coded in Alphanumeric- was originally presented by D. R. Morrison\cite{morrison1968patricia}
+to reduce the space complexity of trie representations.
+The problem arises when the keys are sparse resulting in most of the internal nodes having a branching factor of 1.
+Instead Patricia trees keep track of the first offset where the trie branches, thus removing the need for any node with only one descendant.
+%TODO - Add a figure of Patricia trees
+
+\subsection{Critbit}
+Cribit, proposed by D. J. Bernstein\cite{bernsteinCritbit}, is a simplified version of Patricia Trees.
+Instead of storing a branching index over a variable length alphabet, it stores a prefix free set $S$ of bit strings
+as a set of internal nodes which carry the length of $x$ such that $x0$ and $x1$ are prefixes of string in $S$.
+The overhead for each string in $S$ is reduced to one pointer and one integer for each string.
+
+\subsection{Multi-level trie for dictionary}
+Based on the previous sections, one would be inclined to think that the best representation for the dictionary would be a critbit tree.
+However a simple critbit tree would not serve our purpose as we also need to do complex traversals through the dictionary such as edit distance based ones.
+Thus the data structure we came up with is a multi level trie with Patricia tree defined over the characters as the first level
+and cribit based lookup at each internal node.
+This enables us to perform character based traversals as the Patricia tree representation honors character boundaries
+while the internal critbit representation makes it compact as typically one index would only cover a small part of the unicode charset which makes it
+an efficient candidate for critbit.
+
+\section{Sorted list for Postings}
+The postings format matters because each query hits multiple postings format which it then has to combine before returning the result to the user.
+Therefore the postings list must be optimized for such operations, typical of which are union, difference and intersection.
+Sorting the list is the first step among optimizing the list for such operations.
+Sorting gives a time complexity of $O(m+n)$ rather than the raw complexity of $O(m \log(n))$
+To improve the cost of such operations further, skip pointers are maintained in the list which are basically shortcuts to skip over parts of the list
+that are not a part of the final result.
+%TODO - Add skip list figure (IR Book - pg. 36)
+
+\section{Operations on the Index}
+
+\subsection{Initializing the Index}
+Initializing the index involves reading all the active segments in the index and loading their dictionary in memory.
+Opening the index requires the user to provide a base directory as a part of the configuration.
+\begin{listing}
+\inputminted{haskell}{hs/hconfig.hs}
+\caption{Configuration parameters for the index}
+\end{listing}
+
+\begin{listing}
+\inputminted{haskell}{hs/hindex.hs}
+\caption{Handle for the index type}
+\end{listing}
+
+
+\subsection{Adding a Document}
+
+\subsection{Deleting a Document}
+
+\subsection{Flushing the Index}
+
+\subsection{Merging Segments}
+
+\subsection{Querying the Index}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "thesis"
+%%% End:
