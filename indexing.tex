@@ -14,7 +14,7 @@ Rather it tries to provide a framework for building such solutions borrowing con
 implementations to provide a generic yet powerful abstraction.
 At the same time it also assumes a certain structure to the expected interface which reflects in its implementation.
 However the two might be viewed independently if necessary and the aim is to make the aforementioned implementation a specific
-case of the abstraction which in its own would for any generic text retrieval system.
+case of the abstraction which in its own would hold for any generic text retrieval system.
 
 This chapter aims to serve as a text indexing primer to the reader.
 The terms introduced here would form the basis of nomenclature in the rest of this document and
@@ -34,7 +34,7 @@ it is sufficient in cases where the number of documents times the length of such
 On the other hand, web search, in which a term is to matched against all known web pages, is a huge tasking that cannot be computed online as before.
 Thus there is a need for an efficient mechanism to retrieve relevant documents from a large set in a reasonable amount of time.
 To overcome the need for scanning all the documents every time a query is performed we build an \textit{index} of terms corresponding to
-each document thus reducing the problem to looking up the term in this \textit{index} instead of looking up the entire document.
+documents they occur in thus reducing the problem to looking up the term in this \textit{index} instead of looking up the entire document set.
 
 \subsection{Incidence Matrix}
 An Incidence Matrix is a binary term-document mapping where each entry describes whether the term is present in the document or not.
@@ -74,19 +74,20 @@ i.e. those entries where the term occurs in the document.
 
 This matrix is represented as a dictionary of \textit{terms} against a list of records which points to the list of documents in which it occurs.
 This record is called a \textit{posting} and generally besides the document identifier it also contains some meta information about the
-occurrence of a term in the document (for example the term frequency, term vectors, etc.)
-The list of postings corresponding to a term is referred to as \textit{postings list} which is stored order of document ids
-and the collection of such a mapping from \textit{term} to \textit{postings list} is called the \textit{dictionary}
+occurrence of a term in the document (for example the term frequency, term vectors, etc.).
+The list of postings corresponding to a term is referred to as \textit{postings list} which is stored in order of document ids
+and the collection of such a mapping from \textit{term} to \textit{postings list} is called the \textit{dictionary}.
 
 \section{Building the Index}
 
 \subsection{Extracting Terms}
+\label{terms}
 Before the index can be built, the list of terms need to be extracted from the document. This in turn is composed of multiple tasks like
 \begin{itemize}
   \item \textbf{Tokenization} is the process of extracting semantically meaningful identifiers from the document.
     It is language dependent and can range from simple implementations like delimiter splitting the text to advanced and more complex
     methods involving language detection, hyphenation sensitive parsing, compound word handling, etc.
-  \item \textbf{Stop word elimination} involves extremely commonly used words like pronouns, conjunctions, etc from the tokens which do
+  \item \textbf{Stop word elimination} involves extremely commonly used words like pronouns, conjunctions, etc.\ from the tokens which do
     not add value to the retrieval process.
   \item \textbf{Normalization} refers to the process of canonicalizing terms such that semantically similar terms are grouped under
     same equivalence classes. This ensures that the search process can adjust for case differences, accent and diacritics and other
@@ -99,6 +100,7 @@ The end result of this process results in the list of terms corresponding to tha
 
 
 \subsection{Postings}
+\label{postings}
 The associated meta information in the mapping of terms to document ids are referred to as the \textit{postings list}
 The underlying data structure plays an important role in the efficiency of the search process.
 The most important operations on the posting list are \textit{union}, \textit{intersection} and \textit{difference},
@@ -107,19 +109,20 @@ thus it is important that the underlying representation allows us to perform the
 A simple representation using unordered list offers a time bound of $O(m*log n)$ where $m$ and $n$ are the lengths of the list respectively.
 However by simply ordering the list we can achieve an efficiency of $O(m + n)$
 
-However simple ordered lists of single terms are not enough for some advanced use cases.
+Generally simple ordered lists of single terms are not enough for some advanced use cases.
 For example phrase searches require the postings format to be flexible enough to support such queries.
-The exhaustive details of all such possible operations is beyond the scope of the project but we will see how can this be represented
+The exhaustive details of all such possible operations is beyond the scope of the project but we will see how this can be represented
 in \textit{Haskell} effectively.
 
 
 \subsection{Dictionary}
+\label{dictionary}
 \textbf{Dictionaries} refer to the data structure used to store the mapping from \textit{term}s to \textit{postings}.
 Generally the dictionary is stored in memory with a reference to the postings list on disk.
 The dictionary format plays an important role in determining the type of queries that can be performed on the index.
 For example \textit{wildcard queries} and imprecise query search like \textit{spelling errors} are very common use cases in any text retrieval system.
 Trees are generally the data structures of choice in most applications.
-It allows the user to perform various kinds of traversals which in turn add to the power of searches.
+It allows the user to perform various kinds of traversals which in turn add to the power of search operations.
 
 \textbf{Trie} has been our choice of data structure (for reasons explained later in this document)
 

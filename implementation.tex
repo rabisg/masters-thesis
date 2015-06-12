@@ -8,8 +8,8 @@ which in turn have been studied extensively in Information Retrieval Systems.
 
 \subsection{Segment}
 A segment is the basic unit of the index.
-Each index consists of one or more segments, where each segment is a standalone index holding a subset of the indexed documents\cite{mccandless2010lucene}
-A segment is created whenever the index is flushed at which point all the documents and their indexed terms are written to disk.
+Each index consists of one or more segments, where each segment is a standalone index holding a subset of the indexed documents\cite{mccandless2010lucene}.
+A segment is created whenever the in-memory index is flushed at which point all the documents and their indexed terms are written to disk.
 Querying the index is a compound operation of querying all the active segments, combining their results and presenting it to the end user.
 As the number of segments can grow with time there is a provision to coalesce two segments at a time through the \textit{merge} operation.
 
@@ -65,7 +65,7 @@ The kind of operations supported by the index depends a lot on the data structur
 In our case, besides simple query, we also wanted to support edit distance based queries.
 In Lucene\cite{mccandless2012fst} the data structure of choice is a Deterministic Finite State Transducer\cite{mohri2004weighted} (FST)
 They are a variant of Finite State Automata where in addition to transition symbol each arc is optionally tagged with a output symbol of a semiring.
-Upon traversing the transducers the output symbols are added to provide a output symbol along with the state.
+Upon traversing the transducer the output symbols are added to provide a output symbol along with the state.
 Effectively they can be used to map input in some particular domain to arbitrary outputs similar to a sorted dictionary but with a considerable smaller memory footprint.
 FSTs have been studied extensively including their addition, difference, minimization and composition properties.
 
@@ -124,6 +124,7 @@ to reduce the space complexity of trie representations.
 The problem arises when the keys are sparse resulting in most of the internal nodes having a branching factor of 1.
 Instead Patricia trees keep track of the first offset where the trie branches, thus removing the need for any node with only one descendant.
 
+\begin{center}
 \begin{figure}
 \begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
   \tikzstyle{every state}=[fill=none,draw=black,text=black]
@@ -162,6 +163,7 @@ Instead Patricia trees keep track of the first offset where the trie branches, t
 \end{tikzpicture}
 \caption{Patricia Trees}
 \end{figure}
+\end{center}
 
 \subsection{Critbit}
 Cribit, proposed by D. J. Bernstein\cite{bernsteinCritbit}, is a simplified version of Patricia Trees.
@@ -179,7 +181,7 @@ while the internal critbit representation makes it compact as typically one inde
 an efficient candidate for critbit.
 
 \section{Sorted list for Postings}
-The postings format matters because each query hits multiple postings format which it then has to combine before returning the result to the user.
+The postings format matters because each query hits multiple postings lists which it then has to combine before returning the result to the user.
 Therefore the postings list must be optimized for such operations, typical of which are union, difference and intersection.
 Sorting the list is the first step among optimizing the list for such operations.
 Sorting gives a time complexity of $O(m+n)$ rather than the raw complexity of $O(m \log(n))$
@@ -267,7 +269,6 @@ having knowledge of these low level details.
 \caption{Handle for the index type}
 \end{listing}
 
-\pagebreak
 
 \subsection{Adding a Document}
 A document is the basic unit of dealing with the index. For a document to be added it must be an instance of the \texttt{Document} typeclass.
@@ -311,7 +312,7 @@ All new documents that are added go into this empty segment
 \item Build the dictionary of terms to file offset from the in-memory segment while removing the list of deleted documents
 \item Serialize the data and dictionary to disk
 \item Atomically delete the secondary in-memory index and add this newly added segment to the list of active segments.
-Remove the deleted documents from the list of deleted documents in memory.
+Remove the purged documents from the list of deleted documents in memory.
 \end{itemize}
 
 \begin{listing}
@@ -323,14 +324,14 @@ Remove the deleted documents from the list of deleted documents in memory.
 
 \subsection{Merging Segments}
 Merge operation keeps the number of files in check and can also serve to speed up the query process by merging two small segments into one.
-Merge is also a multi-step operation and care must be taken that no two threads start a merge operation on the same segment at the same time
+Merge is also a multi-step operation and care must be taken that no two threads start a merge operation on the same segment at the same time.
 
 The steps involved in the merge operation are as follows:
 \begin{itemize}
 \item Ensure that no other process/thread is currently processing merge on either of the segment
 \item Merge the two sorted segments, combining the entries in case of same terms, purging deleted documents and then rebuild the dictionary
 \item Serialize the index to disk
-\item Atomically delete the old segments from the list of active segments, add this new segment and update the list of deleted documents.
+\item Atomically delete the old segments from the list of active segments, add this new segment and update the list of deleted documents
 \end{itemize}
 
 \begin{listing}
