@@ -1,6 +1,6 @@
 all: thesis.pdf
 
-thesis.pdf: $(wildcard *.tex) $(wildcard *.cls) citations.bib $(wildcard hs/*.[l]hs)
+thesis.pdf: $(wildcard *.tex) $(wildcard *.cls) citations.bib $(wildcard hs/*.hs) $(wildcard hs/*.lhs)
 	latexmk -pdf -shell-escape thesis.tex
 
 clean:
