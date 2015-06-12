@@ -55,6 +55,17 @@ Liskov and Zilles define strong typing as ``whenever an object is passed from a 
  its type must be compatible with the type declared in the called function''\cite{LZ74}.
 Generally strongly typed languages disallow direct type casting of one type to another and implicit casts.
 
+\subsection{Pattern Matching}
+Abstract data types along with pattern matching provide a new way to structure programs.
+Abstract data types can capture mathematical structures as they appear including recursive structures and multi-value types.
+
+Pattern matching on the other hand helps break down the compound structure into constituent units.
+They are like guarded expressions which help break the function into sub-functions depending on the type or value of variables involved.
+\begin{listing}
+\inputminted{haskell}{hs/fibonacci1.hs}
+\caption{Computing Fibonacci using Pattern matching}
+\end{listing}
+
 
 \section{Lazy Evaluation}
 Lazy evaluation is a the concept of \textbf{call by need} in which the value of an expression is only calculated when it is required.
