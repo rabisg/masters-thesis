@@ -3,8 +3,6 @@
 
 The general idea behind this implementation has been inspired by Lucene\cite{goetz2000lucene}
 which in turn have been studied extensively in Information Retrieval Systems.
-The rest of this chapter is organized as follows
-%TODO
 
 \section{Definitions}
 
@@ -70,7 +68,46 @@ They are a variant of Finite State Automata where in addition to transition symb
 Upon traversing the transducers the output symbols are added to provide a output symbol along with the state.
 Effectively they can be used to map input in some particular domain to arbitrary outputs similar to a sorted dictionary but with a considerable smaller memory footprint.
 FSTs have been studied extensively including their addition, difference, minimization and composition properties.
-%TODO - Add a figure of FST
+
+\begin{figure}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=3.5cm,
+                    semithick]
+  \tikzstyle{every state}=[fill=none,text=black]
+
+  \node[initial,state] (A)                    {$q_a$};
+
+  \node[state]         (B) [above right of=A] {$q_b$};
+  \node[state]         (C) [right of=A]       {$q_c$};
+  \node[state]         (D) [below right of=A] {$q_d$};
+
+  \node[state]         (E) [right of=B]       {$q_e$};
+  \node[state]         (F) [right of=D]       {$q_f$};
+
+  \node[state]         (G) [right of=E]       {$q_g$};
+  \node[state]         (H) [right of=F]       {$q_h$};
+  \node[state]         (I) [right=4cm of C]   {$q_i$};
+
+  \node[state,accepting] (J) [right of=I]       {$q_j$};
+
+  \path (A) edge              node {m}    (B)
+            edge [bend right] node {p/2}  (C)
+            edge [bend left]  node {t/5}  (C)
+            edge [below]      node {s/3}  (D)
+        (B) edge              node {o}    (E)
+        (C) edge              node {o}    (I)
+        (D) edge              node {t}    (F)
+        (E) edge              node {t/1}  (G)
+            edge              node {p}    (J)
+        (F) edge              node {o/1}  (I)
+            edge              node {a}    (H)
+
+
+        (G) edge              node {h}   (J)
+        (I) edge              node {p}   (J)
+        (H) edge              node {r}   (J);
+\end{tikzpicture}
+\caption{FST for words mop, moth, pop, star, stop and top}
+\end{figure}
 
 However we are only concerned with the following operations:
 \begin{itemize}
@@ -86,7 +123,45 @@ PATRICIA- Practical Algorithm to Retrieve Information Coded in Alphanumeric- was
 to reduce the space complexity of trie representations.
 The problem arises when the keys are sparse resulting in most of the internal nodes having a branching factor of 1.
 Instead Patricia trees keep track of the first offset where the trie branches, thus removing the need for any node with only one descendant.
-%TODO - Add a figure of Patricia trees
+
+\begin{figure}
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+  \tikzstyle{every state}=[fill=none,draw=black,text=black]
+
+  \node[state]         (A)                    {};
+  \node[state]         (B) [below of=A]       {s};
+  \node[state]         (C) [below of=B]       {h};
+  \node[state]         (D) [below of=C]       {e};
+  \node[state]         (E) [below of=D]       {l};
+  \node[state]         (F) [below of=E]       {l};
+  \node[state]         (G) [below left of=F]  {s};
+  \node[state]         (H) [below right of=F] {f};
+  \node[state]         (I) [below of=H]       {i};
+  \node[state]         (J) [below of=I]       {s};
+  \node[state]         (K) [below of=J]       {h};
+  \node                    [below left of=K]  {Standard Trie};
+
+  \node[state]         (L) [right=0.7cm and 7cm of A]         {shell};
+  \node[state]         (M) [below left=0.5cm and 1.2cm of L]  {s};
+  \node[state]         (N) [below right=0.5cm and 1.2cm of L] {fish};
+  \node                    [below left of=N]                  {No one-way branching. Patricia Tree};
+
+  \path (A) edge              node {}      (B)
+        (B) edge              node {}      (C)
+        (C) edge              node {}      (D)
+        (D) edge              node {}      (E)
+        (E) edge              node {}      (F)
+        (F) edge              node {}      (G)
+        (F) edge              node {}      (H)
+        (H) edge              node {}      (I)
+        (I) edge              node {}      (J)
+        (J) edge              node {}      (K)
+        (L) edge              node {}      (M)
+        (L) edge              node {}      (N);
+
+\end{tikzpicture}
+\caption{Patricia Trees}
+\end{figure}
 
 \subsection{Critbit}
 Cribit, proposed by D. J. Bernstein\cite{bernsteinCritbit}, is a simplified version of Patricia Trees.
@@ -109,8 +184,60 @@ Therefore the postings list must be optimized for such operations, typical of wh
 Sorting the list is the first step among optimizing the list for such operations.
 Sorting gives a time complexity of $O(m+n)$ rather than the raw complexity of $O(m \log(n))$
 To improve the cost of such operations further, skip pointers are maintained in the list which are basically shortcuts to skip over parts of the list
-that are not a part of the final result.
-%TODO - Add skip list figure (IR Book - pg. 36)
+that are not a part of the final result as shown in Figure~\ref{fig:skiplist}
+
+\begin{figure}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+  \tikzstyle{every state}=[fill=none,draw=black,text=black]
+
+  \node[state]         (A)                    {Brutus};
+  \node[state]         (B) [right=1cm of A]       {2};
+  \node[state]         (C) [right of=B]       {4};
+  \node[state]         (D) [right of=C]       {8};
+  \node[state]         (E) [right of=D]       {16};
+  \node[state]         (F) [right of=E]       {19};
+  \node[state]         (G) [right of=F]       {23};
+  \node[state]         (H) [right of=G]       {28};
+  \node[state]         (I) [right of=H]       {42};
+
+
+  \node[state]         (J) [below=1cm of A]       {Caesar};
+  \node[state]         (K) [right=1cm of J]       {1};
+  \node[state]         (L) [right of=K]       {2};
+  \node[state]         (M) [right of=L]       {3};
+  \node[state]         (N) [right of=M]       {5};
+  \node[state]         (O) [right of=N]       {8};
+  \node[state]         (P) [right of=O]       {41};
+  \node[state]         (Q) [right of=P]       {51};
+  \node[state]         (R) [right of=Q]       {60};
+
+  \path (A) edge              node {}      (B)
+        (B) edge              node {}      (C)
+            edge [bend left]  node {16}    (E)
+        (C) edge              node {}      (D)
+        (D) edge              node {}      (E)
+        (E) edge              node {}      (F)
+            edge [bend left]  node {28}    (H)
+        (F) edge              node {}      (G)
+        (G) edge              node {}      (H)
+        (H) edge              node {}      (I)
+
+
+        (J) edge              node {}      (K)
+        (K) edge              node {}      (L)
+            edge [bend left]  node {5}     (N)
+        (L) edge              node {}      (M)
+        (M) edge              node {}      (N)
+        (N) edge              node {}      (O)
+            edge [bend left]  node {51}    (Q)
+        (O) edge              node {}      (P)
+        (P) edge              node {}      (Q)
+        (Q) edge              node {}      (R);
+
+\end{tikzpicture}
+\caption{Postings list with skip pointers}
+\label{fig:skiplist}
+\end{figure}
 
 \section{Operations on the Index}
 
@@ -123,20 +250,106 @@ Opening the index requires the user to provide a base directory as a part of the
 \end{listing}
 
 \begin{listing}
+\begin{minted}{haskell}
+  initIndex :: HIndexConfig -> IO (HIndex doc p)
+\end{minted}
+\caption{Function to obtain an index handle}
+\end{listing}
+
+The handle for the index is the essential bit containing all the information required for doing subsequent operations.
+It contains the configuration which was supplied during initialization, list of active segments,
+current in-memory segment and list of deleted documents.
+But these details are never exposed to the user.
+The user can only obtain a handle through the initialize operation and using the handle can perform subsequent operations without
+having knowledge of these low level details.
+\begin{listing}
 \inputminted{haskell}{hs/hindex.hs}
 \caption{Handle for the index type}
 \end{listing}
 
+\pagebreak
 
 \subsection{Adding a Document}
+A document is the basic unit of dealing with the index. For a document to be added it must be an instance of the \texttt{Document} typeclass.
+The \texttt{Document} class captures the essential structure of the document and has functions that specify how to extract the terms and their corresponding postings.
+It is worth mentioning that when a document is added to the index it is not immediately written to disk.
+Rather it is stored in memory (in a data structure called in-memory segment). It is written to disk in a sorted manner only when it is flushed.
+
+It is the responsibility of the user to ensure that the document ids are unique and it is by design that there is no method to update documents.
+Updating documents is a two step process. First the old document has to be deleted and then a new document is to be added.
+
+\begin{listing}
+\begin{minted}{haskell}
+  addDoc :: HIndex doc p -> Posting doc p -> IO ()
+\end{minted}
+\caption{Function for adding a document to the index}
+\end{listing}
 
 \subsection{Deleting a Document}
+Deleting a document is a complex and multi-step process. When a user deletes a document, at that moment, only the document id is stored in memory.
+In all subsequent queries, the document corresponding to the stored ids are removed before returning the result to the user.
+Later during the merge or flush process all the terms where this document id occurs are purged.
+It is designed in such a way because the mapping is not from the document to the terms but rather in an inverted manner.
+Therefore to remove all the occurrences of the document from the index, one would have to extract all the terms from the document and modify them.
+As we know, one central idea to the implementation is non-mutation of data written to disk which makes this strategy unusable.
+
+\begin{listing}
+\begin{minted}{haskell}
+  delete :: HIndex doc p -> doc -> IO ()
+\end{minted}
+\caption{Function for deleting a document}
+\end{listing}
 
 \subsection{Flushing the Index}
+Flushing and Merging are the most critical operations on the index.
+The flush operation writes the segment in memory to disk. Care is taken to ensure that at no point in time does the user see an inconsistent version of the index.
+
+The list of operations that are performed are as follows.
+\begin{itemize}
+\item Copy the in-memory segment to a second read-only version of it and clear the original in-memory segment.
+All new documents that are added go into this empty segment
+\item Build the dictionary of terms to file offset from the in-memory segment while removing the list of deleted documents
+\item Serialize the data and dictionary to disk
+\item Atomically delete the secondary in-memory index and add this newly added segment to the list of active segments.
+Remove the deleted documents from the list of deleted documents in memory.
+\end{itemize}
+
+\begin{listing}
+\begin{minted}{haskell}
+  flush :: HIndex doc p -> IO ()
+\end{minted}
+\caption{Function for flushing the in-memory segment}
+\end{listing}
 
 \subsection{Merging Segments}
+Merge operation keeps the number of files in check and can also serve to speed up the query process by merging two small segments into one.
+Merge is also a multi-step operation and care must be taken that no two threads start a merge operation on the same segment at the same time
+
+The steps involved in the merge operation are as follows:
+\begin{itemize}
+\item Ensure that no other process/thread is currently processing merge on either of the segment
+\item Merge the two sorted segments, combining the entries in case of same terms, purging deleted documents and then rebuild the dictionary
+\item Serialize the index to disk
+\item Atomically delete the old segments from the list of active segments, add this new segment and update the list of deleted documents.
+\end{itemize}
+
+\begin{listing}
+\begin{minted}{haskell}
+  merge :: HIndex doc p -> SegmentId -> SegmentId -> IO ()
+\end{minted}
+\caption{Function for merging two segments}
+\end{listing}
 
 \subsection{Querying the Index}
+Querying the index is the process of querying all the segments (possibly in parallel), looking up the search terms in the inverted index and then
+combining the results, removing the list of deleted documents before returning the result to the user.
+
+\begin{listing}
+\begin{minted}{haskell}
+  query :: HIndex doc p -> Text -> IO [Posting doc p]
+\end{minted}
+\caption{Function for querying the index}
+\end{listing}
 
 %%% Local Variables:
 %%% mode: latex
