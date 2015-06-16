@@ -1,8 +1,10 @@
 \chapter{Text Indexing}
 \label{chap:textIndexing}
 
-``Information retrieval (IR) is finding material (usually documents) of an unstructured nature (usually text)
+\begin{displayquote}
+Information retrieval (IR) is finding material (usually documents) of an unstructured nature (usually text)
 that satisfies an information need from within large collections (usually stored on computers).''\cite{IRBook}
+\end{displayquote}
 
 Full text search forms an integral part of Information Retrieval Systems which aim at extracting
 relevant documents from a collection based on certain keywords.
@@ -31,7 +33,7 @@ This is commonly known as \textit{grepping}, after the UNIX utility \textit{grep
 Though this process requires linear time (linear in the number of documents),
 it is sufficient in cases where the number of documents times the length of such documents is small enough.
 
-On the other hand, web search, in which a term is to matched against all known web pages, is a huge tasking that cannot be computed online as before.
+On the other hand, web search, in which a term is to matched against all known web pages, is a huge task that cannot be computed online as before.
 Thus there is a need for an efficient mechanism to retrieve relevant documents from a large set in a reasonable amount of time.
 To overcome the need for scanning all the documents every time a query is performed we build an \textit{index} of terms corresponding to
 documents they occur in thus reducing the problem to looking up the term in this \textit{index} instead of looking up the entire document set.
@@ -79,6 +81,10 @@ The list of postings corresponding to a term is referred to as \textit{postings 
 and the collection of such a mapping from \textit{term} to \textit{postings list} is called the \textit{dictionary}.
 
 \section{Building the Index}
+Building the index is a multi-step process. Before documents can be added relevant terms have to be extracted.
+The exact measure of relevancy and therefore the process depends on the application but in general the process involves
+tokenizing, removing stop words, normalizing and stemming terms.
+The efficiency of operations and the nature of operations supported depend on the Postings format and dictionary representation.
 
 \subsection{Extracting Terms}
 \label{terms}

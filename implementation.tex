@@ -3,8 +3,13 @@
 
 The general idea behind this implementation has been inspired by Lucene\cite{goetz2000lucene}
 which in turn have been studied extensively in Information Retrieval Systems.
+This chapter explains the design and implementation details.
 
 \section{Definitions}
+The following section enlists the definitions given in Chapter~\ref{chap:textIndexing} in the context of the implementation.
+Definitions are complemented with code snippets to explain how Haskell has been used to capture the essence of these definitions and
+the type system has been used to impose certain constraints on the operations,
+for example one index type is not polluted by documents and postings of different types.
 
 \subsection{Segment}
 A segment is the basic unit of the index.
@@ -126,7 +131,7 @@ Instead Patricia trees keep track of the first offset where the trie branches, t
 
 \begin{center}
 \begin{figure}
-\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=1.5cm,semithick]
+\begin{tikzpicture}[-,>=stealth',shorten >=1pt,auto,node distance=1.3cm,semithick]
   \tikzstyle{every state}=[fill=none,draw=black,text=black]
 
   \node[state]         (A)                    {};
@@ -166,7 +171,7 @@ Instead Patricia trees keep track of the first offset where the trie branches, t
 \end{center}
 
 \subsection{Critbit}
-Cribit, proposed by D. J. Bernstein\cite{bernsteinCritbit}, is a simplified version of Patricia Trees.
+Cribit\cite{bernsteinCritbit} is a simplified version of Patricia Trees.
 Instead of storing a branching index over a variable length alphabet, it stores a prefix free set $S$ of bit strings
 as a set of internal nodes which carry the length of $x$ such that $x0$ and $x1$ are prefixes of string in $S$.
 The overhead for each string in $S$ is reduced to one pointer and one integer for each string.
@@ -174,11 +179,13 @@ The overhead for each string in $S$ is reduced to one pointer and one integer fo
 \subsection{Multi-level trie for dictionary}
 Based on the previous sections, one would be inclined to think that the best representation for the dictionary would be a critbit tree.
 However a simple critbit tree would not serve our purpose as we also need to do complex traversals through the dictionary such as edit distance based ones.
-Thus the data structure we came up with is a multi level trie with Patricia tree defined over the characters as the first level
-and cribit based lookup at each internal node.
+Instead a multi level trie with Patricia tree defined over the characters as the first level and cribit based lookup at each internal node
+would serve our purpose as well as be minimal in terms of space.
 This enables us to perform character based traversals as the Patricia tree representation honors character boundaries
 while the internal critbit representation makes it compact as typically one index would only cover a small part of the unicode charset which makes it
 an efficient candidate for critbit.
+We use a third party library, Trie\cite{bytestringTrie}, for this purpose which is effectively a Patricia Tree on the elements of Bytestring and then on their big-endian
+bit representation of those elements.
 
 \section{Sorted list for Postings}
 The postings format matters because each query hits multiple postings lists which it then has to combine before returning the result to the user.
@@ -241,7 +248,11 @@ that are not a part of the final result as shown in Figure~\ref{fig:skiplist}
 \label{fig:skiplist}
 \end{figure}
 
+
 \section{Operations on the Index}
+This section describes the operations that can be performed on the index.
+Besides the standard operations of adding and deleting a document from the index, the use of segments requires two additional operations- flushing and merging.
+The comprehensive list of operations along with their implementation details are given below.
 
 \subsection{Initializing the Index}
 Initializing the index involves reading all the active segments in the index and loading their dictionary in memory.
