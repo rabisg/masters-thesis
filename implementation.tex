@@ -254,6 +254,31 @@ This section describes the operations that can be performed on the index.
 Besides the standard operations of adding and deleting a document from the index, the use of segments requires two additional operations- flushing and merging.
 The comprehensive list of operations along with their implementation details are given below.
 
+\begin{table}[ht]
+  \caption{Index API}
+  \centering
+  \begin{tabular}{|p{3cm}|p{6cm}|p{6cm}|}
+    \toprule
+    Function & Signature & Description \\
+    \midrule
+    \texttt{initIndex} &  \texttt{IndexConfig -> IO (Index doc p)} & Initializes the index and returns a handle \\
+    \midrule
+    \texttt{addDocument} &  \texttt{Index doc p -> doc -> IO ()}   & Adds a new document to the index \\
+\midrule
+    \texttt{deleteDocument} &  \texttt{Index doc p -> doc -> IO ()}   & Deletes a document from the index \\
+    \midrule
+    \texttt{query} &  \texttt{Index doc p -> Term doc -> IO [Posting doc p]}   & Returns the list of postings associated with the term \\
+    \midrule
+    \texttt{flush} &  \texttt{Index doc p -> IO ()}   & Writes the in-memory segment and deleted docs to disk \\
+    \midrule
+    \texttt{getSegmentIds} &  \texttt{Index doc p -> IO [SegmentId]}   & Returns the list of segment ids currently active \\
+    \midrule
+    \texttt{mergeSegments} &  \texttt{Index doc p -> SegmentId -> SegmentId -> IO ()} & Coalesces two segments into one\\
+    \bottomrule
+\end{tabular}
+\end{table}
+
+
 \subsection{Initializing the Index}
 Initializing the index involves reading all the active segments in the index and loading their dictionary in memory.
 Opening the index requires the user to provide a base directory as a part of the configuration.
@@ -264,7 +289,7 @@ Opening the index requires the user to provide a base directory as a part of the
 
 \begin{listing}
 \begin{minted}{haskell}
-  initIndex :: HIndexConfig -> IO (HIndex doc p)
+  initIndex :: IndexConfig -> IO (Index doc p)
 \end{minted}
 \caption{Function to obtain an index handle}
 \end{listing}
@@ -292,7 +317,7 @@ Updating documents is a two step process. First the old document has to be delet
 
 \begin{listing}
 \begin{minted}{haskell}
-  addDoc :: HIndex doc p -> Posting doc p -> IO ()
+  addDocument :: Document doc p => Index doc p -> doc -> IO ()
 \end{minted}
 \caption{Function for adding a document to the index}
 \end{listing}
@@ -307,7 +332,7 @@ As we know, one central idea to the implementation is non-mutation of data writt
 
 \begin{listing}
 \begin{minted}{haskell}
-  delete :: HIndex doc p -> doc -> IO ()
+  deleteDocument :: Document doc p => Index doc p -> doc -> IO ()
 \end{minted}
 \caption{Function for deleting a document}
 \end{listing}
@@ -328,7 +353,7 @@ Remove the purged documents from the list of deleted documents in memory.
 
 \begin{listing}
 \begin{minted}{haskell}
-  flush :: HIndex doc p -> IO ()
+  flush::Document doc p => Index doc p -> IO ()
 \end{minted}
 \caption{Function for flushing the in-memory segment}
 \end{listing}
@@ -347,10 +372,22 @@ The steps involved in the merge operation are as follows:
 
 \begin{listing}
 \begin{minted}{haskell}
-  merge :: HIndex doc p -> SegmentId -> SegmentId -> IO ()
+  mergeSegments :: Document doc p
+                => Index doc p -> SegmentId -> SegmentId -> IO ()
 \end{minted}
 \caption{Function for merging two segments}
 \end{listing}
+
+Segment ids can be obtained by the \texttt{getSegmentIds} call
+
+\begin{listing}
+\begin{minted}{haskell}
+  getSegmentIds :: Index doc p -> IO [SegmentId]
+\end{minted}
+\caption{Function for merging two segments}
+\end{listing}
+
+\clearpage
 
 \subsection{Querying the Index}
 Querying the index is the process of querying all the segments (possibly in parallel), looking up the search terms in the inverted index and then
@@ -358,7 +395,8 @@ combining the results, removing the list of deleted documents before returning t
 
 \begin{listing}
 \begin{minted}{haskell}
-  query :: HIndex doc p -> Text -> IO [Posting doc p]
+  query :: Document doc p
+        => Index doc p -> Term doc -> IO [Posting doc p]
 \end{minted}
 \caption{Function for querying the index}
 \end{listing}

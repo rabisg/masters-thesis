@@ -1,15 +1,14 @@
-data HIndex doc p where
-  HIndex :: Document doc p =>
-            { -- | Current configuration of the running index
-              hConfig         :: HIndexConfig
-              -- | The in-memory terms of the index
-            , hCurSegment     :: IORef (InMemorySegment doc p)
-              -- | The term indices of the active segments
-              -- Currently the term indices of all active segments
-              -- are stored in memory
-            , hActiveSegments :: IORef (Map SegmentId (Dictionary doc p))
-              -- | List of deleted document ids.
-              -- Stored in memory and written to disk
-              -- with each flush operation
-            , hDeletedDocs    :: IORef [doc]
-            } -> HIndex doc p
+-- | Index Handle
+data Index doc p = Index
+                   { -- | Current configuration of the running index
+                     config   :: IndexConfig
+                     -- | The in-memory terms of the index
+                   , segments :: MVar (SegmentSet doc (Posting doc p))
+                   }
+
+data SegmentSet doc p = SegmentSet
+                        { segSetBaseDir    :: FilePath
+                        , inMemorySegment  :: InMemorySegment p
+                        , externalSegments :: Map SegmentId (ExternalSegment p)
+                        , deletedDocs      :: Set doc
+                        }
